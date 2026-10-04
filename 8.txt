@@ -1,0 +1,58 @@
+Aim: Create a one-mode and two-mode networks.
+
+1. Importing library and creating the dataset.
+CODE:
+import networkx as nx
+import matplotlib.pyplot as plt
+
+fest_coord = "Fest \n Coordinator"
+leads = ["Publicity", "PR", "Event", "Admin", "Hospitality", "Tech n Logs"]
+
+volunteers = {
+    "Publicity" : ["Alex", "Steve"],
+    "PR" : ["Herobrine", "Notch"],
+    "Event" : ["Trevor", "Franklin"],
+    "Admin" : ["Shinnosuke"],
+    "Hospitality" : ["Rem", "Ram"],
+    "Tech n Logs" : ["Kira", "L"]
+}
+
+B = nx.Graph()
+B.add_node(fest_coord, bipartite = 0, role = "Coordinator")
+B.add_nodes_from(leads, bipartite = 0, role = "Lead")
+
+for vlist in volunteers.values():
+    B.add_nodes_from(vlist, bipartite = 1, role = "Volunteer")
+
+for lead in leads:
+    B.add_edge(fest_coord, lead)
+
+for lead, vols in volunteers.items():
+    for vol in vols:
+        B.add_edge(lead, vol)
+
+2. Visualization of the network.
+CODE:
+def draw_graph(B):
+    top_nodes = {n for n, d in B.nodes(data = True) if d['bipartite'] == 0}
+    bottom_nodes = set(B) - top_nodes
+    pos = {}
+    pos.update((n, (i,1)) for i, n in enumerate(top_nodes))
+    pos.update((n, (i, 0)) for i, n in enumerate(bottom_nodes))
+    plt.figure(figsize = (80, 30))
+    nx.draw(B, pos, with_labels = True, node_color = ['orange' if d['role'] == 'Coordinator' else 'yellow' if d['role'] == 'Lead' else 'lightgreen' for _, d in B.nodes(data = True)], node_size = 120000, font_size = 50, font_weight = 'bold')
+    plt.title("Two-Mode Network : Fest Coordinator, Lead, Volunteers")
+    plt.show()
+
+draw_graph(B)
+
+
+3. Lead to lead projection (based on share volunteers).
+CODE:
+leads_nodes = [n for n, d in B.nodes(data=True) if d['role'] == 'Lead']
+lead_projection = nx.bipartite.projected_graph(B, leads_nodes)
+
+plt.figure(figsize = (12,8))
+nx.draw(lead_projection, with_labels = True, node_color = 'red', node_size = 5000, font_weight = 'bold')
+plt.title("Lead to Lead Projection")
+plt.show()

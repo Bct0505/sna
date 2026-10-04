@@ -1,0 +1,68 @@
+Aim: Structural equivalence, Automorphic equivalence and Regular equivalence.
+
+1. Importing the libraries and creating a sample network.
+CODE:
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import networkx as nx
+import matplotlib.pyplot as plt
+from itertools import combinations
+
+G = nx.DiGraph()
+edges = [("Alice","Manager"), ("Bob","Manager"), ("Charlie","Manager"), ("Manager","HR"), ("Manager","Finance"), ("HR","CEO"), ("Finance","CEO")]
+G.add_edges_from(edges)
+
+plt.figure(figsize = (8,6))
+pos = nx.spring_layout(G, seed = 42)
+nx.draw(G, pos, with_labels = True, node_color = "green", node_size = 2800, arrows = True)
+plt.title("Corporate Communication Network")
+plt.show()
+2. Creating Structurally Equivalent Pairs.
+CODE:
+from itertools import combinations
+def se(G):
+    s = []
+    for u,v in combinations(G.nodes(),2):
+        if(set(G.successors(u)) == set(G.successors(v))) and (set(G.predecessors(u)) == set(G.predecessors(v))):
+            s.append((u,v))
+    return s
+print("Structurally Equivalent Pairs : ", se(G))
+3. Creating Automorphically Equivalent Pairs.
+CODE:
+from itertools import combinations
+import networkx as nx
+
+def ae(G):
+    a = []
+    for u,v in combinations(G.nodes(), 2):
+        mapping = {u:v, v:u}
+        for node in G.nodes():
+            if node not in mapping:
+                mapping[node] = node
+        
+        G_swapped = nx.relabel_nodes(G, mapping)
+        if nx.is_isomorphic(G, G_swapped):
+            a.append((u,v))
+    return a
+print("Automorphically Equivalent Pairs : ", ae(G))
+4. Regular Equivalence.
+CODE:
+roles = {}
+for node in G.nodes():
+    preds = set(G.predecessors(node))
+    succs = set(G.successors(node))
+
+    if preds == set() and succs == {"Manager"}:
+        roles[node]= "Employee"
+    elif preds == {"Alice", "Bob", "Charlie"}:
+        roles[node] = "Manager"
+    elif preds == {"Manager"} and "CEO" in set(G.successors("HR")).union(G.successors("Finance")):
+        roles[node] = "Department"
+    elif preds == {"HR", "Finance"}:
+        roles[node] = "CEO"
+    else:
+        roles[node] = "Other"
+
+role_df = pd.DataFrame.from_dict(roles, orient = 'index', columns = ['Role'])
+role_df

@@ -1,0 +1,51 @@
+Aim: Creating sociograms for different network types in python (Jupyter Notebook).
+
+1. Unipartite Graph.
+CODE:
+import networkx as nx
+import matplotlib.pyplot as plt
+
+G_uni = nx.Graph()
+G_uni.add_nodes_from(["Jay", "Zameer", "Aditya", "Aayush", "Soham"])
+G_uni.add_edges_from([
+    ("Jay","Zameer"), ("Jay","Aditya"), ("Aayush","Soham"), ("Aayush","Jay"), ("Jay","Soham"), ("Aayush","Zameer")
+])
+
+plt.figure(figsize = (6,6))
+nx.draw(G_uni, with_labels = True, node_color = 'green', edge_color = 'blue', node_size = 2400)
+plt.title("Unipartite Sociogram")
+plt.show()
+2. Bipartite Graph.
+CODE:
+from networkx.algorithms import bipartite
+B = nx.Graph()
+
+people   = ["Yami","Asta","Yuno","Naruto","Goku","Sasuke","Vegeta","Saitama"]
+events = ["Magic","Esports","Martial Arts","Cooking"]
+
+B.add_nodes_from(people, bipartite = 0)
+B.add_nodes_from(events, bipartite = 1)
+B.add_edges_from([
+    ("Yami","Magic"),("Asta","Magic"),("Yuno","Magic"),("Naruto","Esports"), ("Sasuke", "Esports"), ("Goku","Martial Arts"), ("Vegeta","Martial Arts"), ("Saitama","Cooking")
+])
+
+pos = nx.bipartite_layout(B, people)
+plt.figure(figsize = (8,6))
+nx.draw(B, pos, with_labels = True, node_color = ['lightgreen' if node in people else 'lightcoral' for node in B.nodes()], node_size = 2400, font_size = 12)
+plt.title("Bipartite Sociogram")
+plt.show()
+3. Degree of Centrality for unipartite network.
+CODE:
+centrality = nx.degree_centrality(G_uni)
+ns = [5000 * centrality[node] for node in G_uni.nodes()]
+
+pos = nx.spring_layout(G_uni, seed = 42)
+plt.figure(figsize = (8,6))
+nx.draw_networkx_nodes(G_uni, pos, node_size = ns, node_color = 'skyblue', edgecolors = 'black')
+nx.draw_networkx_edges(G_uni, pos, edge_color = 'gray')
+
+labels = {node : f"{node}\n({centrality[node]:.2f})" for node in G_uni.nodes()}
+nx.draw_networkx_labels(G_uni, pos, labels, font_size = 10)
+plt.title("Unipartite Network with Degree of Centrality (With Scores)")
+plt.axis('off')
+plt.show()

@@ -1,0 +1,104 @@
+Aim: Distinguish between matrix, edge list and sociogram.
+
+1. Importing the libraries.
+CODE:
+import pandas as pd
+import networkx as nx
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+sns.set_theme(style = "whitegrid")
+print("Libraries imported sucessfully")
+2. Creating corporal dataset.
+CODE:
+emails = pd.DataFrame({
+    "Sender" : ["CEO", "CEO", "CEO", "HR", "HR", "Finance", "Finance", "Manager", "Manager", "Manager", "Dev1", "Dev2", "Dev3", "Research", "Sales", "Sales"],
+    "Reciever" : ["HR", "Finance", "Manager", "Manager", "Dev1", "CEO", "Sales", "Dev1", "Dev2", "Research", "Dev3", "Dev3", "Research", "CEO", "CEO", "Manager"]
+})
+3. Edge List representation.
+CODE:
+print("Edge List")
+for i, row in emails.iterrows():
+    print(row["Sender"], "-->", row["Reciever"])
+4. Creating a graph.
+CODE:
+G = nx.from_pandas_edgelist(emails, source = "Sender", target = "Reciever", create_using = nx.DiGraph())
+print("Graph Information:")
+print("Employees : ", list(G.edges()))
+print("Connections : ", list(G.edges()))
+5.  Creating adjacency matrix.
+CODE:
+matrix = nx.to_pandas_adjacency(G, dtype = int)
+print(matrix)
+
+6. Adjacency Matrix heatmap.
+CODE:
+import plotly.express as px
+import plotly.io as pio
+
+pio.renderers.default = "notebook"
+fig = px.imshow(matrix, text_auto = True, color_continuous_scale = "Blues", labels = { "x" : "Reciever", "y" : "Sender", "color" : "Email Connection"}, title = "Iteractive Corporate Email Adjacency Matrix")
+fig.update_layout(width = 800, height = 700)
+fig.show()
+7. Creating Sociogram.
+CODE:
+import networkx as nx
+import plotly.graph_objects as go
+
+pos = nx.kamada_kawai_layout(G)
+edge_x = []
+edge_y = []
+for a, b in G.edges():
+    x1, y1 = pos[a]
+    x2, y2 = pos[b]
+    edge_x += [x1, x2, None]
+    edge_y += [y1, y2, None]
+
+edges = go.Scatter(x = edge_x,
+                   y = edge_y, 
+                   mode = "lines",
+                   line = dict(color = "gray", width =2),
+                   hoverinfo = "none"
+                  )
+
+node_x = []
+node_y = []
+info = []
+
+for n in G.nodes():
+    x, y = pos[n]
+    node_x.append(x)
+    node_y.append(y)
+    info.append(
+        f"{n}<br>"
+        f"Sent: {G.out_degree(n)}<br>"
+        f"Recieved: {G.in_degree(n)}"
+    )
+
+nodes = go.Scatter(
+    x = node_x,
+    y = node_y,
+    mode = "markers + text",
+    text = list(G.nodes()),
+    textposition = "top center",
+    hovertext = info,
+    hoverinfo = "text",
+    marker = dict(
+        size = 35,
+        color = node_x,
+        colorscale = "Viridis"
+    )
+)
+
+fig = go.Figure([edges, nodes])
+fig.update_layout(
+    title = "Corporate Email Network",
+    showlegend = False,
+    width = 900,
+    height = 700,
+    plot_bgcolor = "white",
+    xaxis_visible = False,
+    yaxis_visible = False
+)
+
+fig.show()

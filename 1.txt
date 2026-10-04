@@ -1,0 +1,221 @@
+Aim: Computing basic network properties,
+1. Connectivity, Adjacency List & Matrix and Density. 
+2. Ego Network.
+3. Less Reachability.
+4. DataFrame, Dashboard and Degree Distribution.
+
+1. Connectivity, Adjacency List & Matrix and Density.  
+CODE:
+import networkx as nx
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Creating a connected graph.
+
+G = nx.Graph()
+
+edges = [
+    ("Rohit" , "Aditya"),
+    ("Rohit" , "Aayush"),
+    ("Zameer" , "Jay"),
+    ("Jay" , "Zameer"),
+    ("Aayush" , "Zameer"),
+    ("Jay" , "Aayush"),
+    ("Aditya" , "Zameer"),
+    ("Aditya" , "Jay"),
+    ("Rohit" , "Soham"),
+    ("Rohit" , "Mahesh"),
+    ("Rohit"  , "Vinayak"),
+    ("Mahesh" , "Vinayak"),
+    ("Vinayak"  , "Mahesh"),
+    ("Zameer" , "Rohit"),
+    ("Soham" , "Vinayak"),
+    ("Soham" , "Aayush"),
+    ("Aditya" , "Mahesh")
+    ]
+
+G.add_edges_from(edges)
+
+# Visualizing the graph.
+
+plt.figure(figsize = (8,6))
+pos = nx.spring_layout(G, seed = 42)
+
+nx.draw(G,
+        pos,
+        with_labels = True,
+        node_color = "red",
+        node_size = 1500,
+        font_size = 10,
+        edge_color = "blue"
+        )
+
+plt.title("Connected Social Network Graph")
+plt.show()
+
+# Checking the connectivity of the Network.
+
+is_connected = nx.is_connected(G)
+print(f"Graph is fully reachable (connected): {is_connected}")
+
+components = nx.number_connected_components(G)
+print(f"Number of connected components: {components}")
+
+# Calculating the Density. Formula for Density: D = 2E/N(N-1)
+
+density = nx.density(G)
+print(f"Network Density: {density:.2f}")
+
+# Displaying Adjaceny List.
+ 	
+print("\nAdjaceny List:")
+for node in G.adj:
+    print(f"{node}: {list(G.adj[node])}")
+
+nodes = sorted(G.nodes())
+adj_matrix = nx.to_numpy_array(G, nodelist = nodes)
+
+# Creating and Displaying the Adjacent matrix.
+
+print("\nAdjaceny Matrix:")
+print("Nodes:", nodes)
+print(adj_matrix)
+
+
+
+
+2. Ego Network.
+CODE:
+import networkx as nx
+import matplotlib.pyplot as plt
+
+G = nx.Graph()
+G.add_edges_from([
+    ("Naruto" , "Sasuke"),
+    ("Naruto" , "Sakura"),
+    ("Kakashi" , "Minato")
+    ])
+
+ego = nx.ego_graph(G, "Naruto")
+nx.draw(ego, with_labels = True, node_color = "orange", node_size = 2000)
+plt.title("Ego Network of Naruto")
+plt.show()
+3. Less Reachability.
+CODE:
+import networkx as nx
+import matplotlib.pyplot as plt
+import numpy as np
+
+G = nx.Graph()
+edges=[("A","B"),("B","C")]
+G.add_edges_from(edges)
+G.add_edge("D","E")
+print("Is A reachable from E?", nx.has_path(G, "A","E"))
+print("Is B reachable from C?", nx.has_path(G, "B","C"))
+print("Is D reachable from E?", nx.has_path(G, "D","E"))
+print("Is D reachable from B?", nx.has_path(G, "D","B"))
+print("Is A reachable from C?", nx.has_path(G, "A","C"))
+
+pos=nx.spring_layout(G)
+nx.draw(G,pos,with_labels=True,node_color="lightblue",node_size=2000)
+plt.title("Graph with less reachablilty")
+plt.show()
+
+4. DataFrame, Dashboard and Degree Distribution.
+CODE:
+import networkx as nx
+import matplotlib.pyplot as plt
+import pandas as pd
+from IPython.display import display
+
+df = pd.DataFrame({
+    'User1' : ['Alice', 'Alice', 'Alice', 'Bob', 'Bob', 'Charlie', 'David', 'Eva', 'Frank', 'Grace', 'Harry', 'David'],
+    'User2' : ['Bob', 'Charlie', 'David', 'Charlie', 'Eva', 'Frank', 'Eva', 'Frank', 'Grace', 'Harry', 'Alice', 'Grace']
+})
+
+display(df)
+
+G = nx.from_pandas_edgelist(df, 'User1', 'User2')
+
+nodes = G.number_of_nodes()
+edges = G.number_of_edges()
+
+degrees = dict(G.degree())
+highest_node = max(degrees, key = degrees.get)
+lowest_node = min(degrees, key = degrees.get)
+
+print("=" * 60)
+print("Social Media Network Dashboard")
+print("=" * 60)
+print(f"Total Users: {nodes}")
+print(f"Total Friendships: {edges}")
+print(f"Most Connected User: {highest_node}")
+print(f"Lowest Degree User: {lowest_node}")
+
+degree_df = pd.DataFrame(
+    list(degrees.items()), columns = ["User" , "Degree"]
+)
+
+degree_df = degree_df.sort_values(
+    by = "Degree", ascending  = False
+)
+
+display(degree_df)
+
+plt.figure(figsize = (8,5))
+plt.bar(
+    degree_df["User"],
+    degree_df["Degree"],
+    color = "royalblue"
+)
+plt.title("Degree Distribution")
+plt.xlabel("Users")
+plt.ylabel("Degree")
+plt.grid(axis = 'y')
+plt.show()
+CODE:
+import networkx as nx
+import matplotlib.pyplot as plt
+import pandas as pd
+import ipywidgets as widgets
+from IPython.display import display, clear_output
+
+df = pd.DataFrame({
+    'User1' : ['Alice', 'Alice', 'Alice', 'Bob', 'Bob', 'Charlie', 'David', 'Eva', 'Frank', 'Grace', 'Harry', 'David'],
+    'User2' : ['Bob', 'Charlie', 'David', 'Charlie', 'Eva', 'Frank', 'Eva', 'Frank', 'Grace', 'Harry', 'Alice', 'Grace']
+})
+
+G = nx.from_pandas_edgelist(df, 'User1', 'User2')
+
+user_dropdown = widgets.Dropdown(
+    options = list(G.nodes()),
+    description = 'User:'
+)
+
+output = widgets.Output()
+
+
+def update(change):
+    with output:
+        clear_output(wait = True)
+        user= user_dropdown.value
+        print(f"Selected User: {user}")
+        print("Friends:", list(G.neighbors(user)))
+        print("Degree:", G.degree(user))
+
+        plt.figure(figsize = (6,4))
+        pos = nx.spring_layout(G, seed = 42)
+        nx.draw_networkx(
+            G,
+            pos, 
+            node_color = [
+                'red' if n == user else 'skyblue'
+                for n in G.nodes()
+            ],
+            node_size = 2500
+        )
+        plt.show()
+
+user_dropdown.observe(update, names = 'value')
+display(user_dropdown, output)
+update(None)

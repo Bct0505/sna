@@ -1,0 +1,32 @@
+Aim: Shortest path, Density, Ego Network and Ego Network Visualization.
+
+1. Creating the dataset and plotting the network graph.
+CODE:
+import networkx as nx
+import matplotlib.pyplot as plt
+import pandas as pd
+
+G = nx.Graph()
+edges = [("Alice" , "Bob"), ("Bob" , "Claire"), ("Claire" , "David"), ("David" , "Eva"), ("Eva", "Frank"), ("Bob" , "Frank"), ("Alice" , "George"), ("George" , "Hannah")]
+G.add_edges_from(edges)
+
+nx.draw(G, pos, with_labels = True, node_color = "red", node_size = 1800, font_size = 10, edge_color = "blue")
+plt.title("Friends Network Graph")
+plt.show()
+
+2. Calculating the shortest path between the source and destination.
+CODE:
+path = nx.shortest_path(G, source = "Hannah", target = "Frank")
+print("Shortest path from Hannah to Frank : ", path)
+3. Calculating the network density. Density: D = 2E/N(N-1).
+CODE:
+density = nx.density(G)
+print("Network Density : ", round(density, 2))
+
+4. Ego Networks.
+CODE:
+ego = nx.ego_graph(G, "Bob")
+pos = nx.spring_layout(ego)
+nx.draw(ego, pos, with_labels = True, node_color = "orange", node_size = 1800, edge_color = "red")
+plt.title("Bob's Ego Network")
+plt.show()

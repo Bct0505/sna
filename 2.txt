@@ -1,0 +1,60 @@
+Aim: Import datasets and transform matrices. Measures of similarity i.e cosine similarity and jaccard score, Binary Relations, basic network matrices transformation.
+
+1. Dataset Creation.
+CODE:
+import streamlit as st
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.metrics import jaccard_score
+
+data = {
+    "Student" : ["Ghost","DxDexter","Zameer17","Shadow","Atomic","Kalemite", "Soham", "Kaiser", "Roy", "DxDexter", "Ghost", "Zameer17", "Roy"],
+    "Interest" : ["AI/ML", "Graphic Designer", "Analytics", "Ethical Hacking", "Application Testing", "Java Dev", "AI Cooking Tool", "Data Analytics", "AI Assistant", "Canva", "Reading Manga", "AI/ML", "Application Testing"]
+}
+
+df = pd.DataFrame(data)
+df
+2. Incidence Matrix.
+CODE:
+incidence = pd.crosstab(df["Student"], df["Interest"])
+incidence
+
+3. Binary Matrix Generation.
+CODE:
+binary_matrix = (incidence > 0).astype(int)
+binary_matrix
+4. Student Network Matrix.
+CODE:
+student_network = binary_matrix.values @ binary_matrix.values.T
+
+student_sim_df = pd.DataFrame(student_network, index = incidence.index, columns = incidence.index)
+student_sim_df
+5. Cosine Similarity Analysis.
+CODE:
+cos_sim = cosine_similarity(binary_matrix) #cosine similarity = A.B/|A|.|B|
+cos_df = pd.DataFrame(cos_sim, index = incidence.index, columns = incidence.index)
+cos_df
+6. Jaccard Similarity Analysis.
+CODE:
+def jaccard_matrix(X):
+    n = X.shape[0]
+    J = np.zeros((n , n))
+    for i in range(n):
+        for j in range(n):
+            J[i][j] = jaccard_score(X[i], X[j]) 
+    return J
+
+jac_sim = jaccard_matrix(binary_matrix.values)     #Jaccard Similarity= (A intersection B) / (A U B)
+jac_df = pd.DataFrame(jac_sim, index = incidence.index, columns = incidence.index)
+jac_df
+7. Similarity Heatmap Visualization.
+CODE:
+import seaborn as sns
+import matplotlib.pyplot as plt
+plt.figure(figsize = (6, 4))
+sns.heatmap(cos_df, annot = True, cmap = "YlGnBu")
+plt.title("Student Interest Similarity (Cosine)")
+plt.show()

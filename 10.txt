@@ -1,0 +1,43 @@
+Aim: Identify core-periphery ties using two-mode analysis.
+
+1. Importing the libraries and creating the two mode network.
+CODE:
+import networkx as nx
+import matplotlib.pyplot as plt
+from networkx.algorithms import bipartite
+
+B = nx.Graph()
+actors = ['Alice', 'Bob', 'Charlie', 'David', 'Eva']
+movies = ['M1', 'M2', 'M3', 'M4']
+
+B.add_nodes_from(actors, bipartite = 0)
+B.add_nodes_from(movies, bipartite = 1)
+
+edges = [
+    ('Alice','M1'), ('Bob', 'M1'), ('Charlie','M1'), ('Alice', 'M2'), ('David','M2'), ('Eva', 'M3'), ('Bob','M4'), ('Charlie','M4'), ('Eva','M4')
+]
+B.add_edges_from(edges)
+
+2. Plotting the two mode network graph.
+CODE:
+pos = nx.spring_layout(B)
+nx.draw(B, pos, with_labels = True, node_color = 'pink', edge_color = 'green', node_size = 1800)
+plt.title("Two- Mode Network: Actors & Movies")
+plt.show()
+
+3. Project to one mode network and visualizing it.
+CODE:
+ag = bipartite.projected_graph(B, actors)
+
+nx.draw(ag, with_labels = True, node_color= 'violet', node_size = 1800)
+plt.title("Actor Co-participation Network")
+plt.show()
+
+4. Degree, Eigenvector and Betweenness Centrality.
+CODE:
+dc = nx.degree_centrality(ag)
+ec = nx.eigenvector_centrality(ag)
+bc = nx.betweenness_centrality(ag)
+
+for a in actors:
+    print(f"{a} : Degree = {dc[a]:.2f}, Eigenvector = {ec[a]:.2f}, Betweenness = {bc[a]:.2f}")

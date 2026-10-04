@@ -1,0 +1,55 @@
+Aim: Compute node level measures: Centrality measures, Notion of Importance, Graph Centers, Reciprocity, Clustering.
+
+1. Creating and displaying the graph.
+CODE:
+import networkx as nx
+import matplotlib.pyplot as plt
+
+G = nx.Graph()
+edges = [('A' , 'B'), ('A' , 'C'), ('B' , 'C'), ('B' , 'D'), ('C' , 'D'), ('D' , 'E')]
+G.add_edges_from(edges)
+
+plt.figure(figsize = (6,4))
+nx.draw(G, with_labels = True, node_color = 'lightblue', node_size = 1500, font_size = 14)
+plt.title("Graph")
+plt.show()
+2. Degree of centrality.
+CODE:
+#degree of centrality (v) = Degree(v)/n-1 where v = no. of connection and n = no. of nodes
+deg_centrality = nx.degree_centrality(G)
+print("Degree of Centrality:")
+for node, cent in deg_centrality.items():
+    print(f"Node {node} : {cent:.2f}")
+3. Betweenness Centrality.
+CODE:
+bet_centrality = nx.betweenness_centrality(G)
+print("Betweenness Centrality:")
+for node,cent in bet_centrality.items():
+    print(f"Node {node} : {cent:.2f}")
+4. Closeness Centrality.
+CODE:
+#CLoseness Centrality (node) = n-1/n
+close_centrality = nx.closeness_centrality(G)
+print("Closeness Centrality:")
+for node, cent in close_centrality.items():
+    print(f"Node {node} : {cent:.2f}")
+5. Eccentricity.
+CODE:
+ecc = nx.eccentricity(G)
+min_ecc = min(ecc.values())
+centers = [node for node, e in ecc.items() if e == min_ecc]
+print("Eccentricity of Nodes:")
+for node, e in ecc.items():
+    print(f"Node {node} : {e}")
+print(f"\nGraph Centers (min ecc = {min_ecc} : {centers})")
+6. Reciprocity (Directed Graph).
+CODE:
+DG = G.to_directed()
+recip = nx.reciprocity(DG)
+print(f"Reciprocity of the directed graph : {recip:.2f}")
+7. Clustering Coefficient.
+CODE:
+clustering = nx.clustering(G)
+print("Clustering Coefficient:")
+for node, coeff in clustering.items():
+    print(f"Node {node} : {coeff:.2f}")
